@@ -1,0 +1,328 @@
+/* Basic layout */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Helvetica Neue", Arial, sans-serif;
+  background: #050a16;
+  color: #f7fafc;
+}
+
+#app {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* Slides */
+
+.slides {
+  height: 100vh;
+  width: 100vw;
+  position: relative;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+
+.slide.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Intro + text slides centered vertically */
+
+.slide-intro .intro-content,
+.slide-text .centered-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 720px;
+  text-align: center;
+}
+
+.slide-intro h1 {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.slide-intro h2 {
+  font-size: 1.4rem;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  color: #cbd5f5;
+}
+
+.slide-intro p {
+  line-height: 1.6;
+}
+
+.intro-hint {
+  margin-top: 1.5rem;
+  font-size: 0.95rem;
+  color: #9ca3af;
+}
+
+/* Typewriter text */
+
+.typewriter {
+  font-size: 1.3rem;
+  line-height: 1.7;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* Visualization slide */
+
+.slide-viz .slide-inner {
+  /* shrink vertical padding so everything fits */
+  padding: 40px 80px 24px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.slide-header h2 {
+  font-size: 2rem;
+  margin: 0 0 0.5rem;
+}
+
+.slide-header p {
+  margin: 0;
+  max-width: 900px;
+  color: #d1d5db;
+}
+
+.control-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: flex-end;
+}
+
+.control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 200px;
+}
+
+.control label {
+  font-size: 0.9rem;
+  color: #9ca3af;
+}
+
+.control select,
+.control input[type="range"] {
+  background: #0b1020;
+  border: 1px solid #374151;
+  border-radius: 999px;
+  padding: 8px 14px;
+  color: #e5e7eb;
+  font-size: 0.9rem;
+}
+
+.control input[type="range"] {
+  -webkit-appearance: none;
+  height: 6px;
+  padding: 0;
+}
+
+/* range styling */
+.control input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  background: #1f2937;
+  border-radius: 999px;
+}
+
+.control input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #3b82f6;
+  margin-top: -5px;
+}
+
+.viz-row {
+  display: grid;
+  grid-template-columns: 1.1fr 1.1fr;
+  gap: 20px;
+  flex: 1;
+}
+
+/* Cards */
+
+.viz-card {
+  background: radial-gradient(circle at top left, #111827 0, #020617 55%);
+  border-radius: 18px;
+  padding: 16px 20px 14px; /* smaller padding so charts aren't huge */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.viz-card h3 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #9ca3af;
+}
+
+/* Map + legend */
+
+#mapContainer {
+  flex: 1;
+  min-height: 280px; /* smaller so it fits better */
+}
+
+#mapSvg {
+  width: 100%;
+  height: 100%;
+}
+
+#mapLegend {
+  margin-top: 8px;
+  font-size: 0.75rem;
+  color: #d1d5db;
+}
+
+.map-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.map-legend-swatch {
+  width: 32px;
+  height: 10px;
+  border-radius: 4px;
+}
+
+/* Line chart */
+
+#stateSeasonContainer {
+  flex: 1;
+  min-height: 280px; /* also smaller */
+  position: relative;
+}
+
+#stateSeasonSvg {
+  width: 100%;
+  height: 100%;
+}
+
+.milestone-note {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: #e5e7eb;
+}
+
+/* Footnote */
+
+.slide-footnote {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  text-align: center;
+}
+
+/* Nav arrows */
+
+.nav-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid #4b5563;
+  background: rgba(17, 24, 39, 0.85);
+  color: #e5e7eb;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.nav-arrow-left {
+  left: 24px;
+}
+
+.nav-arrow-right {
+  right: 24px;
+}
+
+.nav-arrow:hover {
+  background: rgba(31, 41, 55, 0.95);
+  border-color: #9ca3af; /* grey hover, not purple */
+}
+
+/* Pager dots */
+
+.pager {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+
+.pager-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #1f2937;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.pager-dot.active {
+  background: #3b82f6; /* blue similar to graphs */
+  transform: scale(1.2);
+}
+
+/* Tooltip */
+
+.tooltip {
+  position: fixed;
+  pointer-events: none;
+  background: rgba(17, 24, 39, 0.94);
+  color: #f9fafb;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  border: 1px solid #4b5563;
+  z-index: 20;
+}
+
+/* Responsive tweaks */
+
+@media (max-width: 1100px) {
+  .slide-viz .slide-inner {
+    padding: 32px 18px 20px;
+  }
+
+  .viz-row {
+    grid-template-columns: 1fr;
+  }
+}

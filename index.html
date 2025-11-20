@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>DSC 106 – Final Project</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="styles.css" />
+  <!-- main.js imports D3 + TopoJSON as ES modules -->
+  <script type="module" src="main.js" defer></script>
+</head>
+<body>
+  <div id="app">
+    <!-- Left / right navigation arrows -->
+    <button id="prevSlide" class="nav-arrow nav-arrow-left" aria-label="Previous slide">
+      &#10094;
+    </button>
+    <button id="nextSlide" class="nav-arrow nav-arrow-right" aria-label="Next slide">
+      &#10095;
+    </button>
+
+    <div class="slides">
+      <!-- Slide 0: Intro - no header/footer, no typing -->
+      <section class="slide slide-intro active" data-slide-index="0">
+        <div class="intro-content">
+          <h1>When Seasons Shift</h1>
+          <h2>How U.S. seasons evolve across vegetation, temperature, and water</h2>
+          <p>
+            From 2014 to 2024, satellites watched the United States breathe through spring,
+            sweat through summer, and cool into winter. Meanwhile, the U.S. signed the Paris
+            Agreement, left it, and then rejoined. What changed on the ground while the politics
+            shifted above?
+          </p>
+          <p class="intro-hint">
+            Press the arrow key or click the button to continue.
+          </p>
+        </div>
+      </section>
+
+      <!-- Slide 1: narrative text with typing effect -->
+      <section class="slide slide-text type-slide" data-slide-index="1">
+        <div class="centered-text">
+          <p class="typewriter"
+             data-fulltext="Before we worry about policies, let’s simply look at the seasons themselves. How do U.S. states warm, cool, green, and dry out over a typical year? And how stable is that pattern as the Paris era unfolds?">
+          </p>
+        </div>
+      </section>
+
+      <!-- Slide 2: main map + seasonal pattern -->
+      <section class="slide slide-viz" id="spaceSlide" data-slide-index="2">
+        <div class="slide-inner">
+          <div class="slide-header">
+            <h2>How Do Seasons Look from Space?</h2>
+            <p>
+              Use MODIS NDVI, land surface temperature (day &amp; night), and evapotranspiration to
+              explore how seasons unfold across U.S. states. Pick a variable, set a month and year,
+              then click on a state to follow its seasons through the Paris Agreement years.
+            </p>
+          </div>
+
+          <div class="control-row">
+            <div class="control">
+              <label for="varSelect">Variable</label>
+              <select id="varSelect">
+                <option value="ndvi">NDVI (Vegetation Greenness)</option>
+                <option value="lstDay">Land Surface Temp – Day (°F)</option>
+                <option value="lstNight">Land Surface Temp – Night (°F)</option>
+                <option value="et">Evapotranspiration (mm/day)</option>
+              </select>
+            </div>
+
+            <div class="control">
+              <label for="yearSlider">Year: <span id="yearLabel">2014</span></label>
+              <input type="range" id="yearSlider" min="2014" max="2024" value="2014" step="1" />
+            </div>
+
+            <div class="control">
+              <label for="monthSelect">Month</label>
+              <select id="monthSelect">
+                <option value="1">January</option>
+                <option value="2">February</option>
+                <option value="3">March</option>
+                <option value="4">April</option>
+                <option value="5">May</option>
+                <option value="6">June</option>
+                <option value="7">July</option>
+                <option value="8">August</option>
+                <option value="9">September</option>
+                <option value="10">October</option>
+                <option value="11">November</option>
+                <option value="12">December</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="viz-row">
+            <!-- Map -->
+            <div class="viz-card">
+              <h3>Seasonal Snapshot Map</h3>
+              <p class="subtitle">
+                Each state is colored by the selected variable for the chosen year and month.
+                Click a state to see its full 2014–2024 seasonal curve.
+              </p>
+              <div id="mapContainer">
+                <svg id="mapSvg"></svg>
+              </div>
+              <div id="mapLegend" aria-label="Map legend"></div>
+            </div>
+
+            <!-- State / U.S. seasonal curve -->
+            <div class="viz-card">
+              <h3 id="stateTitle">U.S. Average Seasonal Pattern</h3>
+              <p class="subtitle" id="stateSubtitle">
+                NDVI (unitless) averaged across all states (2014–2024). Paris Agreement milestones
+                are shown as red dotted lines.
+              </p>
+              <div id="stateSeasonContainer">
+                <svg id="stateSeasonSvg"></svg>
+              </div>
+              <div id="milestoneNote" class="milestone-note">
+                Click a red dotted line to see which Paris Agreement milestone it marks.
+              </div>
+            </div>
+          </div>
+
+          <p class="slide-footnote">
+            Vertical red lines mark key Paris Agreement milestones. Hover points to see monthly
+            values; use the controls above to switch variables, years, and months.
+          </p>
+        </div>
+      </section>
+
+      <!-- Slide 3: narrative text with typing -->
+      <section class="slide slide-text type-slide" data-slide-index="3">
+        <div class="centered-text">
+          <p class="typewriter"
+             data-fulltext="Patterns on a single map can feel like snapshots. To see whether U.S. seasons are drifting in one direction, we need to compress each year into a single heartbeat and line those heartbeats up across policy eras.">
+          </p>
+        </div>
+      </section>
+    </div>
+
+    <!-- Slide pager dots -->
+    <div id="pager" class="pager"></div>
+  </div>
+
+  <!-- shared tooltip for charts -->
+  <div id="tooltip" class="tooltip" style="opacity:0;"></div>
+</body>
+</html>
