@@ -5,6 +5,7 @@
   <title>DSC 106 – Final Project</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" type="image/png" href="assets/favicon.png">
   <!-- main.js imports D3 + TopoJSON as ES modules -->
   <script type="module" src="main.js" defer></script>
 </head>
@@ -177,12 +178,21 @@
             <div class="viz-card">
               <h3 id="seasonTitle">U.S. Average Yearly Pattern</h3>
               <p class="subtitle" id="seasonSubtitle">
-                Lines show the yearly averages for the selected variable. Blue is the selected state
-                (or U.S. as a whole), and orange is the overall U.S. average.
+                Lines show the yearly averages for the selected variable.
               </p>
               <div id="seasonBarContainer">
                 <svg id="seasonBarSvg"></svg>
               </div>
+              <div id="seasonLegend" class="season-legend">
+                <div class="legend-item">
+                  <span class="legend-color us"></span> U.S. Average
+                </div>
+                <div class="legend-item" id="legendStateItem" style="display:none;">
+                  <span class="legend-color state"></span>
+                  <span id="legendStateLabel">Selected State</span>
+                </div>
+              </div>
+
               <div class="season-note">
                 Tip: Change the month to update the map, then click a different state to see the lines
                 transition between patterns.
@@ -230,6 +240,17 @@
               <div id="yearlyTrendContainer" class="yearly-trend-container">
                 <svg id="yearlyTrendSvg"></svg>
               </div>
+              <div id="yearlyLegend" class="yearly-legend">
+              <div class="legend-item">
+                <span class="legend-color us"></span>
+                    U.S. Average
+              </div>
+              <div class="legend-item" id="yearlyStateLegend" style="display:none;">
+                <span class="legend-color state"></span>
+                <span id="yearlyStateLegendLabel">Selected State</span>
+                </div>
+              </div>
+
               <div class="yearly-tip">
                 Tip: Pick a state to compare its line (solid teal) with the U.S. average (solid orange).
                 Dashed lines mark years when the U.S. joined, signaled an exit from, left, or rejoined the Paris Agreement.

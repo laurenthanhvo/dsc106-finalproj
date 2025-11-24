@@ -532,6 +532,7 @@ function initSeasonControls() {
   monthSelect.addEventListener("change", () => {
     currentSeasonMonth = +monthSelect.value;
     updateSeasonMap();
+    updateSeasonalChart();
   });
 }
 
@@ -581,6 +582,8 @@ function initSeasonMap() {
         .attr("stroke-width", (s) =>
           s.properties.name === selectedState ? 1.6 : 0.6
         );
+      document.getElementById("legendStateLabel").textContent = d.properties.name;
+      document.getElementById("legendStateItem").style.display = "flex";
     });
 
   updateSeasonMap();
@@ -954,7 +957,7 @@ function updateSeasonTitle() {
     : "U.S. Average Yearly Pattern";
 
   title.textContent = prefix;
-  subtitle.textContent = `${cfg.label} averaged by year. Blue line shows the selected state (or U.S. as a whole); the orange line shows the overall U.S. average.`;
+  subtitle.textContent = `${cfg.label} averaged by year. `;
 }
 
 /* -------------------- Yearly trend visualization (Slide 4 – stacked view) -------------------- */
@@ -1007,6 +1010,17 @@ function updateYearlyExplanation() {
 
   bodyEl.textContent = expl.body + suffix;
 }
+function updateYearlyLegend() {
+  const legend = document.getElementById("yearlyStateLegend");
+  const label = document.getElementById("yearlyStateLegendLabel");
+
+  if (!yearlyState || yearlyState === "") {
+    legend.style.display = "none";
+  } else {
+    legend.style.display = "flex";
+    label.textContent = yearlyState;
+  }
+}
 
 function initYearlyTrend() {
   const varSelect = document.getElementById("yearlyVarSelect");
@@ -1041,12 +1055,14 @@ function initYearlyTrend() {
     yearlyVar = varSelect.value;
     updateYearlyTrend();
     updateYearlyExplanation();
+    updateYearlyLegend(); 
   });
 
   stateSelect.addEventListener("change", () => {
     yearlyState = stateSelect.value;
     updateYearlyTrend();
     updateYearlyExplanation();
+    updateYearlyLegend(); 
   });
 
   // --- Build chart ---

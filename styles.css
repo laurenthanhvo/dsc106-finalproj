@@ -1461,3 +1461,63 @@ svg text {
   font-weight: 600;
 }
 
+/* Legend container */
+.season-legend {
+  display: flex;
+  gap: 1.25rem;
+  margin-top: 10px;
+  position: relative;
+  z-index: 10;
+  font-size: 14px;
+  color: #000000; /* dark text for readability */
+}
+
+/* Each legend item */
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Color boxes */
+.legend-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+/* These MUST match your D3 line colors */
+.legend-color.us {
+  background-color: #ff7f50; /* or your U.S. line color */
+}
+
+.legend-color.state {
+  background-color: #4da6ff; /* or your state line color */
+}
+
+#yearlyLegend {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* spacing between legend items */
+  flex-wrap: wrap; /* optional: allows wrapping on small screens */
+}
+
+#yearlyLegend .legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-color {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px; /* -> square with rounded corners */
+}
+.legend-color.us {
+  background-color: #f97316; /* orange */
+}
+.legend-color.state {
+  background-color: #22c55e; /* teal */
+}
