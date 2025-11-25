@@ -531,7 +531,7 @@ svg .timeline-hover-zone {
 
 .primary-link-btn {
   display: inline-flex;
-  alignment: center;
+  alignment-baseline: center;
   margin-top: 1.5rem;
   padding: 8px 16px;
   border-radius: 999px;
