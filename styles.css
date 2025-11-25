@@ -15,7 +15,8 @@ body {
 #app {
   position: relative;
   min-height: 100vh;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;   
 }
 
 /* Slides */
@@ -173,6 +174,18 @@ body {
   grid-template-columns: 1.4fr 1fr;
   gap: 20px;
   flex: 1;
+}
+
+.dot-highlight {
+  stroke: #ffd500;
+  stroke-width: 4px;
+}
+
+.timeline-dot.selected {
+  stroke: #ffffff;
+  stroke-width: 4px;
+  r: 10;           /* bigger ring */
+  fill: #2563eb;   /* optional: blue fill */
 }
 
 /* Cards */
@@ -657,6 +670,7 @@ svg .timeline-hover-zone {
   stroke: #f97316;
   stroke-dasharray: 4, 4;
   opacity: 0.75;
+  margin-top: 0.5rem;
 }
 
 /* LABELS: now dark instead of white */

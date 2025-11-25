@@ -324,36 +324,70 @@ function startTypewriterOnSlide(idx) {
   if (!slide.classList.contains("type-slide")) return;
   if (typingStarted.has(idx)) return;
 
-  const el = slide.querySelector(".typewriter");
-  if (!el) return;
+  const els = slide.querySelectorAll(".typewriter");
+  if (!els.length) return;
+
   typingStarted.add(idx);
 
-  const full = el.getAttribute("data-fulltext") || "";
-  el.textContent = "";
+  const first = els[0];
+  const firstFull = first.getAttribute("data-fulltext") || "";
+  first.textContent = "";
   let i = 0;
 
-  function tick() {
-    if (i <= full.length) {
-      el.textContent = full.slice(0, i);
+  function typeFirst() {
+    if (i <= firstFull.length) {
+      first.textContent = firstFull.slice(0, i);
       i += 1;
-      setTimeout(tick, 22);
+      setTimeout(typeFirst, 22);
     } else {
-      // when the main paragraph is done, type out any bullets on this slide
-      animateBulletsOnSlide(slide);
+      // FIRST done → animate bullets and record duration
+      const bulletDuration = animateBulletsOnSlide(slide);
+
+      // SECOND starts AFTER bullets finish
+      if (els.length > 1) {
+        setTimeout(typeSecond, bulletDuration);
+      }
     }
   }
 
-  tick();
+  function typeSecond() {
+    const second = els[1];
+    const secondFull = second.getAttribute("data-fulltext") || "";
+    second.textContent = "";
+    let j = 0;
+
+    function tickSecond() {
+      if (j <= secondFull.length) {
+        second.textContent = secondFull.slice(0, j);
+        j += 1;
+        setTimeout(tickSecond, 22);
+      }
+    }
+
+    tickSecond();
+  }
+
+  typeFirst();
 }
+
+
 
 function animateBulletsOnSlide(slide) {
   const bullets = slide.querySelectorAll(".background-bullets li");
   if (!bullets.length) return;
 
-  // store full text and clear it out
+  // ---- STOP ANY PREVIOUS ANIMATION ----
+  if (slide._typingTimeout) {
+    clearTimeout(slide._typingTimeout);
+    slide._typingTimeout = null;
+  }
+
+  // ---- STORE FULL TEXT FIRST (IMPORTANT) ----
   bullets.forEach((li) => {
-    li.dataset.fulltext = li.textContent;
-    li.textContent = "";
+    if (!li.dataset.fulltext) {
+      li.dataset.fulltext = li.textContent; 
+    }
+    li.textContent = "";              // clear after storing
     li.style.visibility = "visible";
   });
 
@@ -364,16 +398,16 @@ function animateBulletsOnSlide(slide) {
     if (bulletIndex >= bullets.length) return;
 
     const li = bullets[bulletIndex];
-    const text = li.dataset.fulltext || "";
+    const text = li.dataset.fulltext;
 
     if (charIndex <= text.length) {
       li.textContent = text.slice(0, charIndex);
-      charIndex += 1;
-      setTimeout(typeNext, 18);       // speed of typing inside each bullet
+      charIndex++;
+      slide._typingTimeout = setTimeout(typeNext, 18);
     } else {
-      bulletIndex += 1;
+      bulletIndex++;
       charIndex = 0;
-      setTimeout(typeNext, 150);      // pause between bullets
+      slide._typingTimeout = setTimeout(typeNext, 150);
     }
   }
 
@@ -1363,7 +1397,8 @@ function updateTimelineSummary(year) {
 function initTimeline() {
   const container = document.getElementById("timelineContainer");
   const { width, height } = container.getBoundingClientRect();
-
+  let activeClickedYear = null;
+  let hoveringDot = false;
   const margin = { top: 40, right: 40, bottom: 40, left: 40 };
   const w = width - margin.left - margin.right;
   const h = height - margin.top - margin.bottom;
@@ -1404,56 +1439,106 @@ function initTimeline() {
     .attr("fill", (d) => d.color)
     .attr("opacity", 0.85)
     .on("mouseenter", (event, d) => {
-      d3.select("#timelineNote").text(
-        `${d.start}–${d.end}: ${d.label} (${d.status})`
-      );
-    })
-    .on("mouseleave", () => {
-      d3.select("#timelineNote").text(
-        "2015–2025: Move along the bar to explore how U.S. membership has changed."
-      );
-    });
-
-  // milestones as dots
-  const dots = g
-    .selectAll("circle.milestone")
-    .data(milestones)
-    .join("circle")
-    .attr("class", "milestone")
-    .attr("cx", (d) => x(d.year))
-    .attr("cy", centerY)
-    .attr("r", 6)
-    .attr("fill", "#111827")
-    .attr("stroke", "#f3f4f6")
-    .attr("stroke-width", 2);
-
-  dots
-    .on("mouseenter", (event, d) => {
+      hoveringDot = true;
       d3.select(event.currentTarget)
         .transition()
         .duration(100)
         .attr("r", 8);
 
       d3.select("#timelineNote").text(d.label);
+
+    if (activeClickedYear === null) {
       updateTimelineSummary(d.year);
+    }
+    });
+
+  // milestones as dots
+const dots = g
+  .selectAll("circle.milestone")
+  .data(milestones)
+  .join("circle")
+  .attr("class", "milestone timeline-dot")
+  .attr("data-year", d => d.year)
+  .attr("cx", (d) => x(d.year))
+  .attr("cy", centerY)
+  .attr("r", 6)
+  .attr("fill", "#111827")
+  .attr("stroke", "#f3f4f6")
+  .attr("stroke-width", 2);
+
+
+  dots
+    .on("mouseenter", (event, d) => {
+      d3.select(event.currentTarget)
+        .transition()
+        .duration(100)
+        .attr("r", 8)
+
+      d3.select("#timelineNote").text(d.label);
+
+      if (activeClickedYear === null) {
+        updateTimelineSummary(d.year);
+      }
+
     })
-    .on("mouseleave", (event) => {
+    .on("mouseleave", (event, d) => {
+    hoveringDot = false;
+
+    if (activeClickedYear !== d.year) {
       d3.select(event.currentTarget)
         .transition()
         .duration(100)
         .attr("r", 6);
+      }
 
-      d3.select("#timelineNote").text(
-        "2015–2025: Move along the bar to explore how U.S. membership has changed."
-      );
+    d3.select("#timelineNote").text(
+      "2015–2025: Move along the bar to explore how U.S. membership has changed."
+    );
 
-      // when no dot is hovered, restore default summary
+    if (activeClickedYear === null) {
       setTimelineSummaryDefault();
-    })
+    }
+  })
+
+
     .on("click", (event, d) => {
-      // clicking also updates summary (in case user isn't scrubbing)
-      updateTimelineSummary(d.year);
-    });
+  const clickedYear = d.year;
+
+  // --- UNSELECT if clicking the same year ---
+  if (activeClickedYear === clickedYear) {
+    activeClickedYear = null;
+
+    // 1. Reset summary
+    setTimelineSummaryDefault();   // <-- THIS MUST RUN
+
+    // 2. Reset dot visuals
+    d3.selectAll(".timeline-dot")
+      .attr("r", 6)
+      .attr("stroke", "#f3f4f6")
+      .attr("stroke-width", 2);
+
+    return; // STOP. DO NOT CONTINUE.
+  }
+
+  // --- SELECT NEW YEAR ---
+  activeClickedYear = clickedYear;
+
+  // Update summary for selected year
+  updateTimelineSummary(clickedYear);
+
+  // Reset all dots first
+  d3.selectAll(".timeline-dot")
+    .attr("r", 6)
+    .attr("stroke", "#f3f4f6")
+    .attr("stroke-width", 2);
+
+  // Highlight clicked one
+  d3.select(event.currentTarget)
+    .attr("r", 10)
+    .attr("stroke", "#ffd500")
+    .attr("stroke-width", 4);
+});
+
 
   // labels above dots
   g
@@ -1468,6 +1553,7 @@ function initTimeline() {
     .attr("font-size", 13)
     .attr("font-weight", "600")
     .text((d) => d.year);
+    
 
   // --- SCRUBBABLE INTERACTION ---
 
@@ -1518,7 +1604,9 @@ function initTimeline() {
       const phase = usParisPhases.find(
         (p) => year >= p.start && year < p.end
       );
-
+      if (activeClickedYear === null) {
+        updateTimelineSummary(year);
+      }
       if (phase) {
         d3.select("#timelineNote").text(
           `${year}: ${phase.label} (${phase.status})`
@@ -1528,7 +1616,6 @@ function initTimeline() {
           "Move along the bar to scrub through time."
         );
       }
-      updateTimelineSummary(year);
     })
     .on("mouseleave", () => {
       hoverLine.style("opacity", 0);
@@ -1536,7 +1623,6 @@ function initTimeline() {
       d3.select("#timelineNote").text(
         "2015–2025: Move along the bar to explore how U.S. membership has changed."
       );
-      setTimelineSummaryDefault();
     });
 
   // set an initial story so the summary card isn't empty
@@ -1546,7 +1632,7 @@ function initTimeline() {
 /* -------------------- Slide 5: Emissions projection play area -------------------- */
 
 /**
- * Approximate global GHG emissions (GtCO₂e) for illustration.
+ * Approximate GHG emissions (GtCO₂e) for illustration.
  * (Rough, stylized values; the point is the ML concept, not exact numbers.)
  */
 const EMISSIONS_DATA = [
@@ -1797,9 +1883,22 @@ function initProjectionSlide() {
     .attr("fill", "transparent")
     .on("mousemove", (event) => {
       const [mx] = d3.pointer(event);
-      const year = Math.round(xProjScale.invert(mx));
-      updateProjectionYear(year, event.pageX, event.pageY);
+      const year = Math.round(xYearScale.invert(mx));
+
+      // Tooltip
+      showYearTooltip(year, event.pageX, event.pageY);
+
+      // 🔥 1. Remove highlight from ALL dots
+      svg.selectAll(".timeline-dot")
+        .classed("dot-highlight", false)
+        .attr("r", 5);
+
+      // 🔥 2. Highlight the selected year’s dot
+      svg.selectAll(`.timeline-dot[data-year='${year}']`)
+        .classed("dot-highlight", true)
+        .attr("r", 9);  // bump size so it visually pops
     })
+
     .on("mouseleave", () => {
       tooltip.style("opacity", 0);
       projYearLine.attr("opacity", 0);
@@ -1829,7 +1928,7 @@ function initProjectionSlide() {
   // slider: focus on 2024–2030 comparison
   yearSlider.min   = 2024;
   yearSlider.max   = 2030;
-  yearSlider.value = 2030;
+  yearSlider.value = 2024;
   yearSlider.addEventListener("input", (e) => {
     const y = +e.target.value;
     // Position tooltip above the line even when changing via slider
@@ -1895,28 +1994,35 @@ function updateProjectionChart(animate = false) {
     .data(actualSeries, d => d.year);
 
   actualPts.join(
-    enter => enter.append("circle")
-      .attr("r", 3)
-      .attr("fill", "#f97316")
-      .attr("cx", d => xProjScale(d.year))
-      .attr("cy", d => yProjScale(d.value)),
-    update => update,
-    exit => exit.remove()
-  );
+  enter => enter.append("circle")
+    .attr("r", 3)
+    .attr("fill", "#f97316")
+    .attr("class", "projection-dot")
+    .attr("data-year", d => d.year)
+    .attr("cx", d => xProjScale(d.year))
+    .attr("cy", d => yProjScale(d.value)),
+  update => update,
+  exit => exit.remove()
+);
+
 
   const modelPts = projModelPoints
-    .selectAll("circle")
-    .data(modelFuture, d => d.year);
+  .selectAll("circle")
+  .data(modelFuture, d => d.year);
 
-  modelPts.join(
-    enter => enter.append("circle")
-      .attr("r", 3)
-      .attr("fill", "#ec4899")
-      .attr("cx", d => xProjScale(d.year))
-      .attr("cy", d => yProjScale(d.value)),
-    update => update,
-    exit => exit.remove()
-  );
+modelPts.join(
+  enter => enter.append("circle")
+    .attr("r", 3)
+    .attr("fill", "#ec4899")
+    .attr("cx", d => xProjScale(d.year))
+    .attr("cy", d => yProjScale(d.value)),
+  update => update
+    .transition()
+    .duration(dur)
+    .attr("cx", d => xProjScale(d.year))
+    .attr("cy", d => yProjScale(d.value)),
+  exit => exit.remove()
+);
 }
 
 /** Update the text explanation (high-level DS / ML narrative). */
