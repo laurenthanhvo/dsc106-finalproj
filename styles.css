@@ -234,7 +234,7 @@ body {
 .map-legend-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 13px;
   margin-top: 4px;
 }
 
@@ -544,7 +544,7 @@ svg .timeline-hover-zone {
 
 .primary-link-btn {
   display: inline-flex;
-  alignments: center;
+  alignment-baseline: center;
   margin-top: 1.5rem;
   padding: 8px 16px;
   border-radius: 999px;
@@ -654,7 +654,7 @@ svg .timeline-hover-zone {
 
 .yearly-line-state {
   fill: none;
-  stroke: #22c55e; /* teal/green */
+  stroke: #38bdf8; /* teal/green */
   stroke-width: 2.2;
 }
 
@@ -663,13 +663,14 @@ svg .timeline-hover-zone {
 }
 
 .yearly-point-state {
-  fill: #22c55e;
+  fill: #38bdf8;
 }
 
 .yearly-milestone-line {
   stroke: #f97316;
   stroke-dasharray: 4, 4;
   opacity: 0.75;
+  margin-top: 0.5rem;
 }
 
 /* LABELS: now dark instead of white */
@@ -1496,7 +1497,7 @@ svg text {
 .legend-color {
   width: 14px;
   height: 14px;
-  border-radius: 3px;
+  border-radius: 4px;
   display: inline-block;
 }
 
@@ -1506,7 +1507,7 @@ svg text {
 }
 
 .legend-color.state {
-  background-color: #4da6ff; /* or your state line color */
+  background-color: #38bdf8; /* or your state line color */
 }
 
 #yearlyLegend {
@@ -1521,17 +1522,3 @@ svg text {
   align-items: center;
   gap: 6px;
 }
-
-.legend-color {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  border-radius: 4px; /* -> square with rounded corners */
-}
-.legend-color.us {
-  background-color: #f97316; /* orange */
-}
-.legend-color.state {
-  background-color: #22c55e; /* teal */
-}
-

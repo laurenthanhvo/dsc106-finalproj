@@ -1802,7 +1802,7 @@ function initProjectionSlide() {
     .attr("text-anchor", "middle")
     .attr("fill", "#e5e7eb")
     .attr("font-size", 11)
-    .text("GHG emissions (GtCO₂e, stylized)");
+    .text("(Global greenhouse gas emissions (GtCO₂e)");
 
   // Paris milestone dashed lines
   const policyYears  = [2015, 2016, 2017, 2020, 2021];
