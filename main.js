@@ -1473,7 +1473,6 @@ const dots = g
         .transition()
         .duration(100)
         .attr("r", 8)
-        
 
       d3.select("#timelineNote").text(d.label);
 

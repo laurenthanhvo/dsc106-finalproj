@@ -1534,3 +1534,56 @@ svg text {
 .legend-color.state {
   background-color: #22c55e; /* teal */
 }
+
+/* --- RESPONSIVE FIX FOR SMALL WINDOWS --- */
+
+/* Allow page to scroll vertically when screen is small */
+body {
+  overflow-y: auto;
+}
+
+/* Prevent graphs from getting smushed */
+#timelineContainer,
+#seasonMapContainer,
+#changeMapContainer,
+#seasonBarContainer,
+#changeBarContainer,
+#yearlyTrendContainer,
+#projectionContainer {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;      /* lets the container scroll sideways instead of shrinking */
+}
+
+/* Make all SVGs scale instead of shrink */
+#timelineContainer svg,
+#seasonMapContainer svg,
+#changeMapContainer svg,
+#seasonBarContainer svg,
+#changeBarContainer svg,
+#yearlyTrendContainer svg,
+#projectionContainer svg {
+  width: 100%;
+  height: auto;
+}
+
+/* Ensure cards stack instead of squeezing */
+.viz-row,
+.viz-card {
+  display: block;
+  width: 100%;
+}
+
+/* Fix annotation overlap on the projection chart */
+#projectionSvg .projection-label,
+#projectionSvg .projection-annotation {
+  font-size: 12px;
+}
+
+/* On small screens, shrink + shift the text */
+@media (max-width: 700px) {
+  #projectionSvg .projection-label,
+  #projectionSvg .projection-annotation {
+    font-size: 10px !important;
+  }
+}
