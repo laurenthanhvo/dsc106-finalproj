@@ -1439,7 +1439,29 @@ function initTimeline() {
     .attr("fill", (d) => d.color)
     .attr("opacity", 0.85)
     .on("mouseenter", (event, d) => {
-      hoveringDot = true;
+      d3.select("#timelineNote").text(d.label);
+
+      if (activeClickedYear === null) {
+        updateTimelineSummary(d.year);
+      }
+    });
+
+  // milestones as dots
+  const dots = g
+    .selectAll("circle.milestone")
+    .data(milestones)
+    .join("circle")
+    .attr("class", "milestone timeline-dot")
+    .attr("data-year", (d) => d.year)
+    .attr("cx", (d) => x(d.year))
+    .attr("cy", centerY)
+    .attr("r", 6)
+    .attr("fill", "#111827")
+    .attr("stroke", "#f3f4f6")
+    .attr("stroke-width", 2);
+
+  dots
+    .on("mouseenter", (event, d) => {
       d3.select(event.currentTarget)
         .transition()
         .duration(100)
@@ -1447,100 +1469,59 @@ function initTimeline() {
 
       d3.select("#timelineNote").text(d.label);
 
-    if (activeClickedYear === null) {
-      updateTimelineSummary(d.year);
-    }
-    });
-
-  // milestones as dots
-const dots = g
-  .selectAll("circle.milestone")
-  .data(milestones)
-  .join("circle")
-  .attr("class", "milestone timeline-dot")
-  .attr("data-year", d => d.year)
-  .attr("cx", (d) => x(d.year))
-  .attr("cy", centerY)
-  .attr("r", 6)
-  .attr("fill", "#111827")
-  .attr("stroke", "#f3f4f6")
-  .attr("stroke-width", 2);
-
-
-  dots
-    .on("mouseenter", (event, d) => {
-      d3.select(event.currentTarget)
-        .transition()
-        .duration(100)
-        .attr("r", 8)
-
-      d3.select("#timelineNote").text(d.label);
-
       if (activeClickedYear === null) {
         updateTimelineSummary(d.year);
       }
-
     })
     .on("mouseleave", (event, d) => {
-    hoveringDot = false;
-
-    if (activeClickedYear !== d.year) {
-      d3.select(event.currentTarget)
-        .transition()
-        .duration(100)
-        .attr("r", 6);
+      if (activeClickedYear !== d.year) {
+        d3.select(event.currentTarget)
+          .transition()
+          .duration(100)
+          .attr("r", 6);
       }
 
-    d3.select("#timelineNote").text(
-      "2015–2025: Move along the bar to explore how U.S. membership has changed."
-    );
+      d3.select("#timelineNote").text(
+        "2015–2025: Move along the bar to explore how U.S. membership has changed."
+      );
 
-    if (activeClickedYear === null) {
-      setTimelineSummaryDefault();
-    }
-  })
-
-
+      if (activeClickedYear === null) {
+        setTimelineSummaryDefault();
+      }
+    })
     .on("click", (event, d) => {
-  const clickedYear = d.year;
+      const clickedYear = d.year;
 
-  // --- UNSELECT if clicking the same year ---
-  if (activeClickedYear === clickedYear) {
-    activeClickedYear = null;
+      // clicking the same dot cancels selection
+      if (activeClickedYear === clickedYear) {
+        activeClickedYear = null;
 
-    // 1. Reset summary
-    setTimelineSummaryDefault();   // <-- THIS MUST RUN
+        setTimelineSummaryDefault();
 
-    // 2. Reset dot visuals
-    d3.selectAll(".timeline-dot")
-      .attr("r", 6)
-      .attr("stroke", "#f3f4f6")
-      .attr("stroke-width", 2);
+        d3.selectAll(".timeline-dot")
+          .attr("r", 6)
+          .attr("stroke", "#f3f4f6")
+          .attr("stroke-width", 2);
 
-    return; // STOP. DO NOT CONTINUE.
-  }
+        return;
+      }
 
-  // --- SELECT NEW YEAR ---
-  activeClickedYear = clickedYear;
+      activeClickedYear = clickedYear;
 
-  // Update summary for selected year
-  updateTimelineSummary(clickedYear);
+      updateTimelineSummary(clickedYear);
 
-  // Reset all dots first
-  d3.selectAll(".timeline-dot")
-    .attr("r", 6)
-    .attr("stroke", "#f3f4f6")
-    .attr("stroke-width", 2);
+      d3.selectAll(".timeline-dot")
+        .attr("r", 6)
+        .attr("stroke", "#f3f4f6")
+        .attr("stroke-width", 2);
 
-  // Highlight clicked one
-  d3.select(event.currentTarget)
-    .attr("r", 10)
-    .attr("stroke", "#ffd500")
-    .attr("stroke-width", 4);
-});
+      d3.select(event.currentTarget)
+        .attr("r", 10)
+        .attr("stroke", "#ffd500")
+        .attr("stroke-width", 4);
+    });
 
-
-  // labels above dots
+  // labels
   g
     .selectAll("text.milestone-label")
     .data(milestones)
@@ -1553,11 +1534,8 @@ const dots = g
     .attr("font-size", 13)
     .attr("font-weight", "600")
     .text((d) => d.year);
-    
 
   // --- SCRUBBABLE INTERACTION ---
-
-  // vertical hover line and active year label
   const hoverLine = g
     .append("line")
     .attr("id", "timelineHoverLine")
@@ -1577,8 +1555,7 @@ const dots = g
     .attr("font-size", 12)
     .style("opacity", 0);
 
-  // transparent zone capturing mouse movement
-  g.append("rect")
+  const scrubZone = g.append("rect")
     .attr("class", "timeline-hover-zone")
     .attr("x", x(2015))
     .attr("y", centerY - 30)
@@ -1587,7 +1564,7 @@ const dots = g
     .attr("fill", "transparent")
     .on("mousemove", (event) => {
       const [mx] = d3.pointer(event);
-      // convert pixel back to year
+
       let year = Math.round(x.invert(mx));
       year = Math.max(2015, Math.min(2025, year));
 
@@ -1601,12 +1578,14 @@ const dots = g
         .text(year)
         .style("opacity", 1);
 
-      const phase = usParisPhases.find(
-        (p) => year >= p.start && year < p.end
-      );
       if (activeClickedYear === null) {
         updateTimelineSummary(year);
       }
+
+      const phase = usParisPhases.find(
+        (p) => year >= p.start && year < p.end
+      );
+
       if (phase) {
         d3.select("#timelineNote").text(
           `${year}: ${phase.label} (${phase.status})`
@@ -1620,14 +1599,22 @@ const dots = g
     .on("mouseleave", () => {
       hoverLine.style("opacity", 0);
       activeYearLabel.style("opacity", 0);
-      d3.select("#timelineNote").text(
-        "2015–2025: Move along the bar to explore how U.S. membership has changed."
-      );
+
+      if (activeClickedYear === null) {
+        setTimelineSummaryDefault();
+        d3.select("#timelineNote").text(
+          "2015–2025: Move along the bar to explore how U.S. membership has changed."
+        );
+      }
     });
 
-  // set an initial story so the summary card isn't empty
+  // move scrub rect behind dots so dots still get mouse events
+  scrubZone.lower();
+
+  // initial
   setTimelineSummaryDefault();
 }
+
 
 /* -------------------- Slide 5: Emissions projection play area -------------------- */
 
