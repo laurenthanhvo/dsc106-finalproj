@@ -1869,27 +1869,22 @@ function initProjectionSlide() {
     .attr("height", h)
     .attr("fill", "transparent")
     .on("mousemove", (event) => {
-      const [mx] = d3.pointer(event);
-      const year = Math.round(xYearScale.invert(mx));
+  const [mx] = d3.pointer(event);
+  const year = Math.round(xProjScale.invert(mx));   // FIXED
 
-      // Tooltip
-      showYearTooltip(year, event.pageX, event.pageY);
+  // Tooltip
+  showYearTooltip(year, event.pageX, event.pageY);
 
-      // 🔥 1. Remove highlight from ALL dots
-      svg.selectAll(".timeline-dot")
-        .classed("dot-highlight", false)
-        .attr("r", 5);
+  // Remove highlight from ALL dots
+  projectionSvg.selectAll(".timeline-dot")
+    .classed("dot-highlight", false)
+    .attr("r", 5);
 
-      // 🔥 2. Highlight the selected year’s dot
-      svg.selectAll(`.timeline-dot[data-year='${year}']`)
-        .classed("dot-highlight", true)
-        .attr("r", 9);  // bump size so it visually pops
-    })
-
-    .on("mouseleave", () => {
-      tooltip.style("opacity", 0);
-      projYearLine.attr("opacity", 0);
-    });
+  // Highlight this year's dot
+  projectionSvg.selectAll(`.timeline-dot[data-year='${year}']`)
+    .classed("dot-highlight", true)
+    .attr("r", 9);
+});
 
   // --- model selector: BAU vs hypothetical “on-track” linear path starting 2024 ---
   modelSelect.addEventListener("change", () => {
@@ -1929,7 +1924,7 @@ function initProjectionSlide() {
   // initial label only (no tooltip so it doesn't show on other slides)
   const yearLabel = document.getElementById("projectionYearLabel");
   if (yearLabel) {
-    yearLabel.textContent = "Focus year: 2030";
+    yearLabel.textContent = "Focus year: 2024";
   }
 }
 
