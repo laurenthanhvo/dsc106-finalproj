@@ -56,7 +56,6 @@
             <li>Strengthen national climate plans every 5 years</li>
             <li>Support adaptation and climate resilience</li>
             <li>Provide financial and technological support to developing countries</li>
-            <!-- <li>To stay on track, global greenhouse gas emissions need to peak by 2025 and fall by about 43% by 2030.</li> -->
             <!-- rewording -->
              <li>Reduce greenhouse gas emissions by ~43% by 2030 after peaking in 2025</li>
           </ul>
@@ -146,6 +145,7 @@
             <div class="control">
               <label for="seasonMonthSelect">Month (for map snapshot)</label>
               <select id="seasonMonthSelect">
+                <option value="0">Yearly Average</option>
                 <option value="1">January</option>
                 <option value="2">February</option>
                 <option value="3">March</option>
@@ -160,15 +160,24 @@
                 <option value="12">December</option>
               </select>
             </div>
+
+            <!-- NEW: Year control for the chart AND map -->
+            <div class="control">
+              <label for="yearSlider">Chart Year: <span id="yearLabel">2014</span></label>
+              <div class="slider-with-play">
+                <input type="range" id="yearSlider" min="2014" max="2024" value="2014" step="1">
+                <button id="playButton" class="play-btn">▶ Play</button>
+              </div>
+            </div>
           </div>
 
           <div class="viz-row">
-            <!-- Seasonal snapshot map -->
+            <!-- Seasonal snapshot map (now updates with year slider) -->
             <div class="viz-card">
-              <h3>Seasonal Snapshot Map</h3>
+              <h3 id="mapTitle">Yearly Average Map</h3>
               <p class="subtitle">
-                Each state is colored by the chosen variable, averaged across 2014–2024 for the selected month.
-                Click a state to see its full seasonal curve on the right.
+                Each state is colored by the chosen variable, averaged for the selected year and month.
+                Click a state to see its full yearly curve on the right. Click again to remove.
               </p>
               <div id="seasonMapContainer">
                 <svg id="seasonMapSvg"></svg>
@@ -176,14 +185,19 @@
               <div id="seasonMapLegend" aria-label="Map legend"></div>
             </div>
 
-            <!-- Seasonal chart (now yearly 2-line chart) -->
+            <!-- Yearly chart (now with slider control) -->
             <div class="viz-card">
               <h3 id="seasonTitle">U.S. Average Yearly Pattern</h3>
               <p class="subtitle" id="seasonSubtitle">
-                Lines show the yearly averages for the selected variable.
+                Lines show the yearly averages for the selected variable. Use the year slider to animate through time.
               </p>
               <div id="seasonBarContainer">
                 <svg id="seasonBarSvg"></svg>
+                <!-- Glowing dot for current year -->
+                <div id="yearTracker" class="year-tracker" style="display: none;">
+                  <div class="tracker-dot"></div>
+                  <div class="tracker-label"></div>
+                </div>
               </div>
               <div id="seasonLegend" class="season-legend">
                 <div class="legend-item">
@@ -196,8 +210,7 @@
               </div>
 
               <div class="season-note">
-                Tip: Change the month to update the map, then click a different state to see the lines
-                transition between patterns.
+                Tip: Use the Play button to animate through years. The glowing dot shows the current year's value.
               </div>
             </div>
           </div>
@@ -273,7 +286,7 @@
         </div>
       </section>
       <!-- Slide 5: Future -->
-      <section class="slide slide-text type-slide" data-slide-index="1">
+      <section class="slide slide-text type-slide" data-slide-index="5">
         <div class="centered-text">
           <p class="typewriter"
             data-fulltext="The Paris Climate Agreement update as of 2025 is as follows:">
@@ -300,7 +313,7 @@
         </div>
       </section>
       <!-- Slide 6: Play Area – emissions projection -->
-      <section class="slide slide-viz" id="slide5" data-slide-index="4">
+      <section class="slide slide-viz" id="slide5" data-slide-index="6">
         <div class="slide-inner">
           <div class="slide-header">
             <h2>Play Area: Visualizing the Warming Path</h2>
@@ -371,22 +384,22 @@
         </div>
       </section>
 
-      <!-- Slide 7: Takeways -->
-      <section class="slide slide-text type-slide" data-slide-index="1">
+      <!-- Slide 7: Takeaways -->
+      <section class="slide slide-text type-slide" data-slide-index="7">
       <div class="centered-text">
         <h2 class="slide-title">Key Takeaways</h2>
-      <li>The U.S. is not on track for the Paris Agreement’s 43% emissions cut by 2030 under current trends.</li>
-      <li>Policy swings (join → withdraw → rejoin) create uncertainty and slow long-term progress.</li>
-      <li>U.S. seasonal data (NDVI and LST) already show warming patterns—hotter summers, shifting vegetation.</li>
-      <li>Global climate policy shapes future warming, which then shapes local U.S. environmental conditions.</li>
-    </ul>
+        <ul class="background-bullets">
+          <li>The U.S. is not on track for the Paris Agreement's 43% emissions cut by 2030 under current trends.</li>
+          <li>Policy swings (join → withdraw → rejoin) create uncertainty and slow long-term progress.</li>
+          <li>U.S. seasonal data (NDVI and LST) already show warming patterns—hotter summers, shifting vegetation.</li>
+          <li>Global climate policy shapes future warming, which then shapes local U.S. environmental conditions.</li>
+        </ul>
 
-    <p class="callout-text">
-      Every year we delay makes the slope steeper. The next few years decide the curve.
-    </p>
-  </div>
-</section>
-
+        <p class="callout-text">
+          Every year we delay makes the slope steeper. The next few years decide the curve.
+        </p>
+      </div>
+    </section>
 
     </div>
 
@@ -396,5 +409,9 @@
 
   <!-- shared tooltip for charts -->
   <div id="tooltip" class="tooltip" style="opacity:0;"></div>
+  
+  <!-- State hover stats -->
+  <div id="stateHoverStats" class="state-hover-stats"></div>
+  
 </body>
 </html>
