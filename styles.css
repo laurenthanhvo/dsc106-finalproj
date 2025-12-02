@@ -1730,3 +1730,92 @@ svg text {
 .viz-card:first-child h3 {
   min-height: 1.5em; /* Prevent layout shift when title changes */
 }
+
+/* =========================================================
+   SLIDE 3: Compact Controls
+   ========================================================= */
+
+/* Fix dropdown width - make them compact */
+#slide3 .control {
+  min-width: 180px; /* Reduced from 200px */
+  max-width: 220px;
+}
+
+/* Compact select styling */
+#slide3 .control select {
+  width: 100%;
+  padding: 6px 12px; /* Reduced padding */
+  font-size: 0.85rem; /* Slightly smaller font */
+}
+
+/* Year slider container - more compact */
+#slide3 .slider-with-play {
+  gap: 8px; /* Reduced gap */
+  margin-top: 2px;
+}
+
+/* Year label styling - remove yellow, make cleaner */
+#slide3 #yearLabel {
+  font-weight: 600;
+  color: #0f172a;
+  background: transparent;
+  padding: 0;
+  margin-left: 0;
+  font-size: 0.85rem;
+  min-width: 40px;
+  display: inline-block;
+}
+
+/* Year slider - remove yellow, make elegant */
+#slide3 #yearSlider {
+  height: 6px;
+  background: linear-gradient(90deg, #1e40af, #3b82f6);
+  border: 1px solid #94a3b8;
+}
+
+#slide3 #yearSlider::-webkit-slider-thumb {
+  width: 18px;
+  height: 18px;
+  background: #2563eb;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.5);
+}
+
+#slide3 #yearSlider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: #2563eb;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.5);
+}
+
+/* Play button - more subtle */
+#slide3 .play-btn {
+  padding: 6px 14px;
+  background: linear-gradient(135deg, #1e40af, #3b82f6);
+  font-size: 0.85rem;
+  box-shadow: 0 3px 6px rgba(37, 99, 235, 0.3);
+}
+
+#slide3 .play-btn:hover {
+  background: linear-gradient(135deg, #1e3a8a, #2563eb);
+  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.4);
+}
+
+#slide3 .play-btn.playing {
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+}
+
+/* Control row - tighter layout */
+#slide3 .control-row {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* Control labels */
+#slide3 .control label {
+  font-size: 0.8rem;
+  margin-bottom: 2px;
+  color: #475569;
+}

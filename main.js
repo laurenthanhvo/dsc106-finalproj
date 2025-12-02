@@ -2297,11 +2297,11 @@ function startPlayback() {
       yearLabel.textContent = currentYear;
     }
     
-    // Update chart, tracker, AND MAP
-    updateYearTracker();
+    // Update chart highlights AND tracker
     updateSeasonalChartForYear(currentYear);
-    updateSeasonMap(); // Update map during playback
-  }, 600); // 600ms = slower for better visualization
+    updateYearTracker();
+    updateSeasonMap();
+  }, 600);
 }
 
 function stopPlayback() {
@@ -2313,9 +2313,6 @@ function stopPlayback() {
 }
 
 function updateSeasonalChartForYear(year) {
-  // This function highlights the specific year on the chart
-  // We already have the glowing dot, but we can also emphasize the points
-  
   if (!seasonSvg) return;
   
   // Highlight the point for current year
@@ -2327,30 +2324,7 @@ function updateSeasonalChartForYear(year) {
     .attr('fill', d => d.year === year ? '#ffd500' : '#f97316')
     .attr('r', d => d.year === year ? 5 : 3);
   
-  // Update tooltip if hovering
-  const series = buildSeasonSeries(selectedState, currentSeasonVar);
-  const yearData = series.find(d => d.year === year);
-  
-  if (yearData && tooltip) {
-    let html = `<strong>${year}</strong><br>`;
-    html += `U.S. avg: ${yearData.usValue.toFixed(3)}`;
-    
-    if (selectedState && yearData.stateValue != null) {
-      html += `<br>${selectedState}: ${yearData.stateValue.toFixed(3)}`;
-    }
-    
-    // Position tooltip near the tracker
-    const chartContainer = document.getElementById('seasonBarContainer');
-    const containerRect = chartContainer.getBoundingClientRect();
-    const x = xSeasonScale(year);
-    const y = ySeasonScale(selectedState ? yearData.stateValue : yearData.usValue);
-    
-    tooltip
-      .style('opacity', 0.9)
-      .html(html)
-      .style('left', (containerRect.left + 60 + x + 20) + 'px')
-      .style('top', (containerRect.top + 30 + y - 20) + 'px');
-  }
+  updateYearTracker(); // update the glowing dot
 }
 
 // Update the state click handler to toggle selection
@@ -2498,72 +2472,46 @@ function updateYearTracker() {
   
   if (!yearData) return;
   
-  // Position tracker at the current year on the chart
+  // Calculate position relative to chart
   const chartContainer = document.getElementById('seasonBarContainer');
   const svgRect = seasonSvg.node().getBoundingClientRect();
   const containerRect = chartContainer.getBoundingClientRect();
   
   const x = xSeasonScale(currentYear);
-  const y = ySeasonScale(selectedState ? yearData.stateValue : yearData.usValue);
   
-  // Convert to absolute positioning
-  const marginLeft = 60; // Match your chart's left margin
-  const marginTop = 30;  // Match your chart's top margin
-  
-  const newX = (marginLeft + x - 6);
-  const newY = (marginTop + y - 6);
-  
-  // Cancel any pending animation
-  if (trackerAnimationFrame) {
-    cancelAnimationFrame(trackerAnimationFrame);
+  // Get the correct Y value - state if selected, otherwise US average
+  let yValue;
+  if (selectedState && yearData.stateValue != null) {
+    yValue = yearData.stateValue;
+  } else {
+    yValue = yearData.usValue;
   }
   
-  // Smooth animation using requestAnimationFrame
-  const startX = parseFloat(yearTracker.style.left) || lastTrackerPosition.x || newX;
-  const startY = parseFloat(yearTracker.style.top) || lastTrackerPosition.y || newY;
+  const y = ySeasonScale(yValue);
   
-  const duration = 300; // ms
-  const startTime = Date.now();
+  // Convert to absolute positioning (matching your chart margins)
+  const marginLeft = 60;  // Left margin of chart
+  const marginTop = 30;   // Top margin of chart
   
-  function animateTracker() {
-    const elapsed = Date.now() - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-    
-    // Easing function for smooth movement
-    const easeProgress = 1 - Math.pow(1 - progress, 3);
-    
-    const currentX = startX + (newX - startX) * easeProgress;
-    const currentY = startY + (newY - startY) * easeProgress;
-    
-    yearTracker.style.left = currentX + 'px';
-    yearTracker.style.top = currentY + 'px';
-    
-    if (progress < 1) {
-      trackerAnimationFrame = requestAnimationFrame(animateTracker);
-    } else {
-      lastTrackerPosition = { x: newX, y: newY };
-    }
-  }
+  const dotSize = 6; // Half the tracker dot size
+  const newX = (marginLeft + x - dotSize);
+  const newY = (marginTop + y - dotSize);
   
-  // Start animation
-  trackerAnimationFrame = requestAnimationFrame(animateTracker);
+  // Smooth animation
+  yearTracker.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+  yearTracker.style.left = newX + 'px';
+  yearTracker.style.top = newY + 'px';
   
   // Update label
   if (yearTrackerLabel) {
     const cfg = VAR_CONFIG[currentSeasonVar];
-    const value = selectedState ? yearData.stateValue : yearData.usValue;
-    let formattedValue = value.toFixed(3);
+    let formattedValue = yValue.toFixed(3);
     
     if (currentSeasonVar === "lstDay" || currentSeasonVar === "lstNight") {
-      formattedValue = value.toFixed(1) + "°F";
+      formattedValue = yValue.toFixed(1) + "°F";
     }
     
     yearTrackerLabel.textContent = `${currentYear}: ${formattedValue}`;
-  }
-  
-  // Update state hover stats if a state is being hovered
-  if (lastHoveredState && stateHoverStats && stateHoverStats.classList.contains('active')) {
-    handleStateHover({}, { properties: { name: lastHoveredState } });
   }
 }
 
