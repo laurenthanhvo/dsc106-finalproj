@@ -1819,3 +1819,115 @@ svg text {
   margin-bottom: 2px;
   color: #475569;
 }
+
+
+/* Slide 7 styling */
+/* Main card-style container */
+.slide7-box {
+    width: 85%;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 28px 32px;
+    margin-top: 25px;
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+/* Title */
+.slide7-title {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+/* Subtitle */
+.slide7-subtitle {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #444;
+    font-size: 15px;
+}
+
+/* Dropdown row styling */
+#slide7DropdownRow {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+/* Individual dropdowns */
+.countryDropdown {
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    background: #fafafa;
+    cursor: pointer;
+    min-width: 150px;
+    transition: all 0.15s ease;
+}
+
+.countryDropdown:hover {
+    border-color: #888;
+    background: white;
+}
+
+.countryDropdown:focus {
+    outline: none;
+    border-color: #005fcc;
+    box-shadow: 0 0 6px rgba(0, 100, 220, 0.3);
+}
+
+/* Chart area */
+#globalChart {
+    margin-top: 10px;
+}
+
+#slide7 {
+    padding: 20px;
+}
+
+.pill-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.slide7-option {
+    padding: 6px 12px;
+    border-radius: 20px;
+    background: #eee;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    transition: 0.2s;
+    user-select: none;
+    font-size: 13px;
+}
+
+.slide7-option.selected {
+    background: #0077ff;
+    color: white;
+    border-color: #005fcc;
+}
+
+.chart-area svg {
+    overflow: visible;
+}
+#slide7DropdownRow {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.countryDropdown {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+}
+

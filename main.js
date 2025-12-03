@@ -2516,6 +2516,197 @@ function updateYearTracker() {
   }
 }
 
+// =========================================================
+// SLIDE 7 — GLOBAL EMISSIONS COMPARISON
+// =========================================================
+
+// =========================================================
+// SLIDE 7 — GLOBAL EMISSIONS COMPARISON WITH 4 DROPDOWNS
+// =========================================================
+
+// ---------- LOAD DATA ----------
+async function loadSlide7Data() {
+    const totalsURL = "data/GHG_totals_by_country.csv";
+
+    const raw = await d3.csv(totalsURL, d3.autoType);
+    const converted = [];
+
+    raw.forEach(row => {
+        const country = row.Country;
+        for (let year = 2014; year <= 2024; year++) {
+            if (row[year] !== undefined && row[year] !== null) {
+                converted.push({
+                    Country: country,
+                    Year: year,
+                    Emissions: +row[year]
+                });
+            }
+        }
+    });
+
+    return converted;
+}
+
+
+
+// ---------- GLOBAL STATE ----------
+let slide7Data = [];
+
+let selectedCountries = {
+    base: "United States",
+    drop1: null,
+    drop2: null,
+    drop3: null,
+    drop4: null
+};
+
+
+
+// ---------- INITIALIZE ----------
+async function initSlide7() {
+    slide7Data = await loadSlide7Data();
+
+    initDropdowns();
+    drawSlide7Chart();
+}
+
+
+
+// ---------- BUILD 4 SELECT DROPDOWNS ----------
+function initDropdowns() {
+    const allCountries = Array.from(
+        new Set(slide7Data.map(d => d.Country))
+    ).sort();
+
+    // Pre-fill first 4 with default countries
+    const defaults = allCountries.filter(c => c !== "United States").slice(0, 4);
+    selectedCountries.drop1 = defaults[0];
+    selectedCountries.drop2 = defaults[1];
+    selectedCountries.drop3 = defaults[2];
+    selectedCountries.drop4 = defaults[3];
+
+    const dropdownIds = ["drop1", "drop2", "drop3", "drop4"];
+
+    dropdownIds.forEach((id, idx) => {
+        const sel = d3.select("#" + id);
+        sel.selectAll("*").remove();
+
+        sel.append("option")
+            .attr("value", "")
+            .text("— Select —");
+
+        sel.selectAll("option.countryOption")
+            .data(allCountries)
+            .enter()
+            .append("option")
+            .attr("class", "countryOption")
+            .attr("value", d => d)
+            .text(d => d);
+
+        // Set initial value
+        sel.property("value", defaults[idx]);
+
+        // Handle change
+        sel.on("change", function () {
+            const val = this.value || null;
+            selectedCountries[id] = val;
+            drawSlide7Chart();
+        });
+    });
+}
+
+
+
+// ---------- DRAW LINE CHART ----------
+function drawSlide7Chart() {
+    const container = d3.select("#globalChart");
+    container.selectAll("*").remove();
+
+    const width = 760;
+    const height = 420;
+    const margin = { top: 20, right: 80, bottom: 40, left: 60 };
+
+    const svg = container.append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+    // Active countries (remove nulls)
+    const active = [
+        selectedCountries.base,
+        selectedCountries.drop1,
+        selectedCountries.drop2,
+        selectedCountries.drop3,
+        selectedCountries.drop4
+    ].filter(d => d !== null);
+
+    const filtered = slide7Data.filter(d =>
+        active.includes(d.Country)
+    );
+
+    if (filtered.length === 0) return;
+
+    const x = d3.scaleLinear()
+        .domain(d3.extent(filtered, d => d.Year))
+        .range([margin.left, width - margin.right]);
+
+    const y = d3.scaleLinear()
+        .domain([0, d3.max(filtered, d => d.Emissions)])
+        .nice()
+        .range([height - margin.bottom, margin.top]);
+
+    const line = d3.line()
+        .x(d => x(d.Year))
+        .y(d => y(d.Emissions));
+
+    const grouped = d3.group(filtered, d => d.Country);
+
+    const color = d3.scaleOrdinal()
+        .domain(active)
+        .range(d3.schemeTableau10);
+
+    grouped.forEach((values, country) => {
+        values.sort((a, b) => a.Year - b.Year);
+
+        svg.append("path")
+            .datum(values)
+            .attr("fill", "none")
+            .attr("stroke", color(country))
+            .attr("stroke-width", 2)
+            .attr("d", line);
+
+        const last = values[values.length - 1];
+
+        svg.append("text")
+            .attr("x", x(last.Year) + 6)
+            .attr("y", y(last.Emissions))
+            .attr("alignment-baseline", "middle")
+            .style("font-size", "12px")
+            .style("fill", color(country))
+            .text(country);
+    });
+
+    // Axes
+    svg.append("g")
+        .attr("transform", `translate(0,${height - margin.bottom})`)
+        .call(d3.axisBottom(x).tickFormat(d3.format("d")));
+
+    svg.append("g")
+        .attr("transform", `translate(${margin.left},0)`)
+        .call(d3.axisLeft(y));
+}
+
+
+
+// ---------- ACTIVATE ON SLIDE CHANGE ----------
+document.addEventListener("slideChange", e => {
+    if (e.detail.index === 7) {
+        initSlide7();
+    }
+});
+
+
+
+
 /* -------------------- Init -------------------- */
 
 async function init() {
@@ -2530,6 +2721,7 @@ async function init() {
   initYearSlider();      // Slide 3: Initialize year slider and play button
   updateStateClickHandler(); // Slide 3: Update click handler for toggle
   initStateHoverStats(); // Initialize state hover stats
+  initSlide7();
 }
 
 // init not being called fix solution 
