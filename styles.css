@@ -1864,12 +1864,6 @@ svg text {
     width: 100%;
 }
 
-/* Big pie chart */
-#topEmittersPie {
-    width: 420px !important;
-    height: 420px !important;
-}
-
 /* Legend on the right, vertical list */
 #pieLegend {
     display: flex;
