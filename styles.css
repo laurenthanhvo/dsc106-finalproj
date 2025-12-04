@@ -1819,3 +1819,109 @@ svg text {
   margin-bottom: 2px;
   color: #475569;
 }
+
+/* ---------- Slide 7 Card Styling (matches other slides) ---------- */
+/* ---------- Main card styling ---------- */
+/* ---------------- Slide 7: Card Layout (match other slides) ---------------- */
+
+#slide7 .slide7-card {
+    width: 95%;
+    max-width: 1400px;     /* wider like your other viz cards */
+    margin: 0 auto;
+    padding: 40px 80px 32px;  /* same padding style */
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* Header styling like rest of your viz cards */
+#slide7 .slide7-title {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+/* ---------------- Controls (dropdown) ---------------- */
+
+/* Make Slide 7 dropdown match global controls */
+#emitterYear,
+#emitterYear.dark-dropdown {
+  background: #111827;            
+  border: 1px solid #0f172a;
+  color: #f9fafb;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.35);
+  cursor: pointer;
+  outline: none;
+  width: auto;         /* shrink to fit */
+  min-width: 140px;    /* not huge */
+  max-width: 200px;
+}
+
+#emitterYear:hover {
+  border-color: #22c55e;
+  box-shadow:
+    0 0 0 1px rgba(34, 197, 94, 0.55),
+    0 8px 20px rgba(15, 23, 42, 0.5);
+}
+
+/* ---------------- Chart Row (pie left, sectors right) ---------------- */
+
+#chartRow {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;   /* bigger bar chart */
+    gap: 40px;
+    width: 100%;
+    align-items: flex-start;
+}
+
+/* Pie area */
+#pieWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Pie & Legend layout */
+#pieRow {
+    display: flex;
+    flex-direction: column;  /* pie over legend */
+    align-items: center;
+    gap: 20px;
+}
+
+/* ---------------- Sector Bar Chart (BIGGER) ---------------- */
+
+#sectorWrapper {
+    width: 100%;
+}
+
+#sectorBreakdownChart {
+    width: 100% !important;
+    height: 520px !important;         /* BIG BAR CHART */
+}
+
+/* ---------------- Legend styling ---------------- */
+
+#pieLegend {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#pieLegend div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#pieLegend span {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+}

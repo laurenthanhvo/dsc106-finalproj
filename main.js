@@ -2516,6 +2516,277 @@ function updateYearTracker() {
   }
 }
 
+// ===============================
+// SLIDE 7 — TOP EMITTERS PIE CHART
+// ===============================
+
+// ------ GLOBAL ------
+let slide7Totals = [];
+let slide7Sectors = [];
+let topPieChart = null;
+let sectorBarChart = null;
+let lastSectorCountry = null;
+
+// ------ LOAD DATA ------
+async function loadSlide7Data() {
+    slide7Totals = await d3.csv("data/GHG_totals_by_country.csv", d3.autoType);
+    slide7Sectors = await d3.csv("data/GHG_by_sector_and_country.csv", d3.autoType);
+}
+
+// ------ INIT SLIDE ------
+async function initSlide7() {
+    await loadSlide7Data();
+    populateYearDropdown();
+    drawTopEmittersPie();
+}
+
+// ------ YEAR DROPDOWN ------
+function populateYearDropdown() {
+    const years = d3.range(2014, 2025);
+    const sel = document.getElementById("emitterYear");
+    sel.innerHTML = "";
+
+    years.forEach(y => {
+        const opt = document.createElement("option");
+        opt.value = y;
+        opt.textContent = y;
+        sel.appendChild(opt);
+    });
+
+    sel.value = 2024;
+
+    sel.onchange = () => {
+    drawTopEmittersPie();
+    const selected = document.querySelector("#sectorBreakdownContainer").style.display;
+
+    // If a sector chart is visible, refresh it
+    if (selected !== "none") {
+        const lastCountry = window.lastSelectedCountry;
+        const year = Number(sel.value);
+
+        if (lastCountry === "Rest of World") {
+            drawRestOfWorldSectors(year);
+        } else {
+            drawSectorBreakdown(lastCountry, year);
+        }
+    }
+};
+
+}
+
+// ------ PIE CHART ------
+function drawTopEmittersPie() {
+    const year = Number(document.getElementById("emitterYear").value);
+
+    // Build country → emissions for selected year
+    const arr = slide7Totals.map(r => ({
+        country: r.Country,
+        value: Number(r[year]) || 0
+    }));
+    
+    const filteredArr = arr.filter(d => d.country !== "GLOBAL TOTAL");
+
+    // Sort the **filtered** array
+    filteredArr.sort((a, b) => b.value - a.value);
+
+
+    const top10 = filteredArr.slice(0, 10);
+    const rest = filteredArr.slice(10).reduce((s, r) => s + r.value, 0);
+
+    const labels = [...top10.map(d => d.country), "Rest of World"];
+    const values = [...top10.map(d => d.value), rest];
+    const PIE_COLORS = [
+        "#4E79A7", "#F28E2B", "#E15759", "#76B7B2", "#59A14F",
+        "#EDC948", "#B07AA1", "#FF9DA7", "#9C755F", "#000000ff",
+        "#CCCCCC" // For "Rest of World"
+    ];
+    let countryColorMap = {};
+    // Pie chart size
+    const ctx = document.getElementById("topEmittersPie").getContext("2d");
+    if (topPieChart) topPieChart.destroy();
+
+    // Total emissions for percentage tooltip
+    const globalTotal = d3.sum(values);
+    labels.forEach((c, i) => {
+      countryColorMap[c] = PIE_COLORS[i];
+  });
+    topPieChart = new Chart(ctx, {
+    type: "pie",
+    data: {
+        labels,
+        datasets: [{
+            data: values,
+            backgroundColor: PIE_COLORS.slice(0, labels.length)
+        }]
+    },
+    options: {
+        responsive: false,
+        plugins: {
+            legend: { position: "bottom" },
+            tooltip: {
+                callbacks: {
+                    label: function (context) {
+                        const country = context.label;
+                        const val = context.raw;
+                        const pct = ((val / globalTotal) * 100).toFixed(2);
+                        return `${country}: ${val.toLocaleString()} MtCO₂e (${pct}%)`;
+                    }
+                }
+            }
+        },
+        onClick: (e, elements) => {
+            if (!elements.length) return;
+
+            const index = elements[0].index;
+            const country = labels[index];
+            const color = PIE_COLORS[index];  // <--- correct slice color
+
+            window.lastSelectedCountry = country;
+
+            if (country === "Rest of World") {
+                drawRestOfWorldSectors(year, color);
+                return;
+            }
+
+            drawSectorBreakdown(country, year, color);
+        }
+    }
+});
+}
+// =====================================
+// SECTOR BAR CHART — INDIVIDUAL COUNTRY
+// =====================================
+function drawSectorBreakdown(country, year, barColor) {
+
+    const filtered = slide7Sectors.filter(
+        r => r.Country?.toLowerCase() === country.toLowerCase()
+    );
+
+    const labels = [];
+    const values = [];
+
+    filtered.forEach(r => {
+        const v = Number(r[year]) || 0;
+        if (v > 0) {
+            labels.push(r.Sector);
+            values.push(v);
+        }
+    });
+
+    // World total for percentage tooltip
+    const worldTotal = slide7Totals.reduce(
+        (sum, r) => sum + (Number(r[year]) || 0), 0
+    );
+
+    showSectorChart(
+        `${country} — Sector Emissions (${year})`,
+        labels,
+        values,
+        barColor,
+        worldTotal
+    );
+}
+
+
+// =====================================
+// REST OF WORLD — SECTOR COMPUTATION
+// =====================================
+function drawRestOfWorldSectors(year, barColor) {
+
+    // Determine top 10 emitters
+    const yearData = slide7Totals
+        .filter(r => r.Country !== "GLOBAL TOTAL")
+        .map(r => ({
+            country: r.Country,
+            value: Number(r[year]) || 0
+        }))
+        .sort((a, b) => b.value - a.value);
+
+    const top10 = yearData.slice(0, 10).map(d => d.country);
+
+    // Build sector totals
+    const sectorTotals = {};
+    const top10Totals = {};
+
+    slide7Sectors.forEach(r => {
+        const v = Number(r[year]) || 0;
+
+        if (!sectorTotals[r.Sector]) sectorTotals[r.Sector] = 0;
+        sectorTotals[r.Sector] += v;
+
+        if (top10.includes(r.Country)) {
+            if (!top10Totals[r.Sector]) top10Totals[r.Sector] = 0;
+            top10Totals[r.Sector] += v;
+        }
+    });
+
+    // Compute rest-of-world = total - top10
+    const labels = [];
+    const values = [];
+
+    Object.keys(sectorTotals).forEach(sec => {
+        const rest = sectorTotals[sec] - (top10Totals[sec] || 0);
+        if (rest > 0) {
+            labels.push(sec);
+            values.push(rest);
+        }
+    });
+
+    const worldTotal = yearData.reduce((s, r) => s + r.value, 0);
+
+    showSectorChart(
+        `Rest of World — Sector Emissions (${year})`,
+        labels,
+        values,
+        barColor,
+        worldTotal
+    );
+}
+
+
+// =====================================
+// SHARED BAR CHART RENDERER
+// =====================================
+function showSectorChart(title, labels, values, barColor, worldTotal) {
+
+    const ctx = document.getElementById("sectorBreakdownChart").getContext("2d");
+    if (sectorBarChart) sectorBarChart.destroy();
+
+    document.getElementById("sectorBreakdownContainer").style.display = "block";
+    document.getElementById("sectorBreakdownTitle").textContent = title;
+
+    sectorBarChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels,
+            datasets: [{
+                data: values,
+                backgroundColor: barColor   // ← EXACT SAME COLOR AS PIE SLICE
+            }]
+        },
+        options: {
+            indexAxis: "y",
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: (tt) => {
+                            const val = tt.raw;
+                            const pct = ((val / worldTotal) * 100).toFixed(2);
+                            return `${val.toLocaleString()} MtCO₂e (${pct}%)`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { title: { display: true, text: "MtCO₂e" } },
+                y: { title: { display: true, text: "Sector" } }
+            }
+        }
+    });
+}
+
+
 /* -------------------- Init -------------------- */
 
 async function init() {
@@ -2530,6 +2801,7 @@ async function init() {
   initYearSlider();      // Slide 3: Initialize year slider and play button
   updateStateClickHandler(); // Slide 3: Update click handler for toggle
   initStateHoverStats(); // Initialize state hover stats
+  initSlide7();
 }
 
 // init not being called fix solution 
