@@ -778,72 +778,179 @@ li {
 }
 
 
-/* -------------------------------------------------------------------
-   12. TOP EMITTERS & SECTORS (SLIDE 7 / #slide6)
-   ------------------------------------------------------------------- */
+/* ======================================================
+   SLIDE 6 – GLOBAL EMISSIONS BAR RACE + SECTOR PIE
+   Same design language as Slide 3
+   ====================================================== */
 
+#slide6::before {
+  content: "";
+  position: absolute;
+  inset: -18%;
+  pointer-events: none;
+  z-index: 0;
+
+  /* Soft background gradients, identical aesthetic to Slide 3 */
+  background:
+    radial-gradient(circle at 0% 15%, rgba(56, 189, 248, 0.10), transparent 60%),
+    radial-gradient(circle at 105% 75%, rgba(16, 185, 129, 0.08), transparent 55%),
+    radial-gradient(circle at 50% 120%, rgba(251, 191, 36, 0.06), transparent 60%);
+}
+
+/* Remove card look */
 #slide6 .slide-inner {
-  width: min(1200px, 92vw);
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  width: 94vw;
+  max-width: 1600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-#slide6 .slide-header p {
-  font-size: 0.95rem;
-  color: #4b5563;
-}
-
-#slide6 .viz-row {
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-}
-
-#pieWrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#pieRow {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  align-items: center;
-}
-
-#pieLegend {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-size: 0.82rem;
-}
-
-#pieLegend div {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-#pieLegend span {
-  width: 14px;
-  height: 14px;
-  border-radius: 4px;
-}
-
-/* Sector breakdown chart */
-#sectorBreakdownContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-#sectorBreakdownTitle {
-  font-size: 0.98rem;
-  letter-spacing: 0.06em;
+/* ------------------------------
+   Header
+   ------------------------------ */
+#slide6 .slide6-header h2 {
+  font-size: clamp(3rem, 4vw, 3.8rem);
+  font-weight: 900;
   text-transform: uppercase;
+  letter-spacing: 0.12em;
+  line-height: 1.1;
+  margin-bottom: 0.8rem;
+  text-align: left;
+
+  color: #111827;
+  background-image: url("assets/paris-hero-text.jpg");
+  background-size: cover;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-#sectorBreakdownChart {
-  width: 100% !important;
-  height: 420px !important;
+#slide6 .slide6-header p {
+  font-size: 1.05rem;
+  line-height: 1.9;
+  color: #4b5563;
+  text-align: left;
+  margin-bottom: 1.3rem;
 }
+
+/* ------------------------------
+   Controls row (slider + play)
+   ------------------------------ */
+#slide6 .slide6-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 1rem;
+  width: 100%;
+  max-width: 3000px;
+}
+
+/* YEAR text */
+#slide6 #slide6YearLabel {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #111827;
+  min-width: 45px;
+}
+
+/* Slider track */
+#slide6 #slide6YearSlider {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 8px;
+  background: #ffffff;
+  border-radius: 999px;
+  border: 2px solid #111827;
+}
+
+/* Slider thumb (Chrome/Safari) */
+#slide6 #slide6YearSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #000;
+  border: 2px solid #fff;
+  margin-top: -7px;
+}
+
+#slide6 #slide6YearSlider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #000;
+  border: 2px solid #fff;
+}
+
+/* Play button */
+#slide6 .slide6-play-btn {
+  padding: 6px 16px;
+  background: #ffffff;
+  color: #111827;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.15s ease;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
+}
+
+#slide6 .slide6-play-btn:hover {
+  background: #f9fafb;
+  border-color: #111827;
+}
+
+#slide6 .slide6-play-btn.playing {
+  background: #111827;
+  color: #f9fafb;
+}
+
+/* ------------------------------
+   Bar Race + Pie Layout
+   ------------------------------ */
+#slide6 .slide6-layout {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr; /* bar on left, pie on right */
+  gap: 3rem;
+  margin-top: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+/* Remove box styling */
+#slide6 .slide6-layout > div {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Titles inside each viz */
+#slide6 .slide6-layout h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.4rem;
+  color: #111827;
+}
+
+#slide6 .slide6-layout p.subtitle {
+  color: #4b5563;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+/* SVGs should scale nicely */
+#barRaceContainer svg,
+#pieChartContainer svg {
+  width: 100%;
+  height: auto;
+}
+
+
 
 /* -------------------------------------------------------------------
    13. TEXT-ONLY SLIDES (BACKGROUND + FUTURE + TAKEAWAYS)
