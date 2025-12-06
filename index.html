@@ -364,64 +364,58 @@
       </section>
 
       <!-- Slide 7: Top Emitters & Sector Breakdown -->
-      <section class="slide slide-viz" id="slide6" data-slide-index="7">
+      <section class="slide slide-viz" id="slide6" data-slide-index="6">
         <div class="slide-inner">
 
+          <!-- Header -->
           <div class="slide-header">
-            <h2>Top Global Emitters</h2>
-            <p class="slide-subtitle">
-              See how global emissions are shared among the world’s largest contributors. 
-              The pie chart shows which countries drive the most emissions in a given year, 
-              while the sector view breaks down what activities — energy, transport, industry, 
-              and more — fuel each country's footprint.  
-              <strong>The U.S. consistently ranks as the second-largest emitter.</strong>
+            <h2>How Have Countries' Emissions Shifted Over Time?</h2>
+            <p>
+              Watch countries rise and fall in total greenhouse gas emissions.  
+              Select any bar to see its sector breakdown.
             </p>
           </div>
 
-          <div class="control-row">
-            <div class="control">
-              <label for="emitterYear">Select Year</label>
-              <select id="emitterYear" class="dark-dropdown"></select>
+          <!-- Controls Row -->
+          <div class="control-row slide6-controls">
+            <button id="slide6PlayBtn" class="play-btn">Play</button>
+
+            <div class="slider-with-play">
+              <span id="slide6YearLabel">1970</span>
+
+              <input
+                type="range"
+                id="slide6YearSlider"
+                min="1970"
+                max="2024"
+                step="1"
+                value="1970"
+              />
             </div>
           </div>
 
-          <!-- Visualization row -->
-          <div class="viz-row">
+          <!-- Visualization Layout -->
+          <div class="slide6-layout">
 
-            <!-- Left: Top emitters pie -->
-            <div class="viz-card">
-              <div id="pieWrapper">
-                <div id="pieRow">
-                  <canvas id="topEmittersPie" width="420" height="420"></canvas>
-                  <div id="pieLegend"></div>
-                </div>
-              </div>
+            <!-- Bar Race Container -->
+            <div id="slide6BarRaceContainer">
+              <h3>Top Emitters Over Time</h3>
+
+              <!-- IMPORTANT: Chart.js requires <canvas> -->
+              <canvas id="slide6BarRaceChart" width="900" height="700"></canvas>
             </div>
 
-            <!-- Right: Sector breakdown -->
-            <div class="viz-card">
-              <div id="sectorBreakdownContainer">
-                <h3 id="sectorBreakdownTitle"></h3>
-                <canvas id="sectorBreakdownChart"></canvas>
-              </div>
+            <!-- Pie Chart Container -->
+            <div id="slide6PieContainer">
+              <h3 id="slide6PieTitle">Sector Breakdown (Select a Country)</h3>
+
+              <!-- IMPORTANT: Chart.js requires <canvas> -->
+              <canvas id="slide6PieChart" width="550" height="550"></canvas>
             </div>
 
           </div>
-
-          <!-- Explanation card -->
-          <div class="viz-card">
-            <h3 id="projectionExplTitle">What Drives These Emissions?</h3>
-            <p id="projectionExplBody">
-              Select a country in the pie chart to reveal how its emissions are distributed by sector.
-              Energy production dominates for most top emitters, but transportation and industry 
-              become major drivers in highly developed economies.
-            </p>
-          </div>
-
         </div>
       </section>
-
-
 
 
       <!-- Slide 8: Takeaways -->

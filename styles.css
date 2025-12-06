@@ -778,72 +778,81 @@ li {
 }
 
 
-/* -------------------------------------------------------------------
-   12. TOP EMITTERS & SECTORS (SLIDE 7 / #slide6)
-   ------------------------------------------------------------------- */
+/* ======================================================
+   SLIDE 6 – GLOBAL EMISSIONS BAR RACE + SECTOR PIE
+   Same design language as Slide 3
+   ====================================================== */
+/* ==========================
+   SLIDE 6 LAYOUT FIXES
+========================== */
 
-#slide6 .slide-inner {
-  width: min(1200px, 92vw);
-}
-
-#slide6 .slide-header p {
-  font-size: 0.95rem;
-  color: #4b5563;
-}
-
-#slide6 .viz-row {
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-}
-
-#pieWrapper {
+#slide6 .slide6-layout {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  width: 100%;
+  gap: 35px;
+  margin-top: 20px;
 }
 
-#pieRow {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  align-items: center;
+/* Left column — BAR RACE */
+#slide6BarRaceContainer {
+  flex: 1.6;              /* Wider bar race area */
+  min-width: 950px;       /* Forces wide layout */
 }
 
-#pieLegend {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-size: 0.82rem;
-}
-
-#pieLegend div {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-#pieLegend span {
-  width: 14px;
-  height: 14px;
-  border-radius: 4px;
-}
-
-/* Sector breakdown chart */
-#sectorBreakdownContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-#sectorBreakdownTitle {
-  font-size: 0.98rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-#sectorBreakdownChart {
+#slide6BarRace {
   width: 100% !important;
-  height: 420px !important;
+  height: 700px !important;
 }
+
+/* Right column — PIE CHART */
+#slide6PieContainer {
+  flex: 0.9;
+  min-width: 450px;
+}
+
+#slide6PieChart {
+  width: 520px;     /* size on the page */
+  height: 520px;
+}
+#slide6PieContainer {
+  margin-left: 40px;
+}
+
+
+/* Header tweaks */
+#slide6 h2 {
+  margin-bottom: 8px;
+}
+
+#slide6 .control-row {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.slider-with-play {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+#slide6YearLabel {
+  font-size: 20px;
+  font-weight: 600;
+}
+/* Tooltip improvements */
+.chartjs-tooltip {
+  font-size: 16px !important;       /* Bigger font */
+  padding: 10px 14px !important;    /* Larger box */
+  border-radius: 8px !important;
+}
+
+
 
 /* -------------------------------------------------------------------
    13. TEXT-ONLY SLIDES (BACKGROUND + FUTURE + TAKEAWAYS)

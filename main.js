@@ -2594,275 +2594,262 @@ function updateYearTracker() {
   }
 }
 
-// ===============================
-// SLIDE 7 — TOP EMITTERS PIE CHART
-// ===============================
+/* -------------------- Slide 6: Emissions -------------------- */
+/* ==========================
+   SLIDE 6 DATA VARIABLES
+========================== */
+let slide6_totals = [];
+let slide6_sectors = [];
+let slide6_currentYear = 1970;
+let slide6_playInterval = null;
 
-// ------ GLOBAL ------
-let slide7Totals = [];
-let slide7Sectors = [];
-let topPieChart = null;
-let sectorBarChart = null;
-let lastSectorCountry = null;
+let barRaceChart = null;
+let sectorPieChart = null;
 
-// ------ LOAD DATA ------
-async function loadSlide7Data() {
-    slide7Totals = await d3.csv("data/GHG_totals_by_country.csv", d3.autoType);
-    slide7Sectors = await d3.csv("data/GHG_by_sector_and_country.csv", d3.autoType);
-}
+/* Consistent country color map */
+const countryColors = {};
+const colorPalette = [
+  "#1F77B4", "#FF7F0E", "#2CA02C", "#D62728", "#9467BD",
+  "#8C564B", "#E377C2", "#17BECF", "#BCBD22", "#7F7F7F"
+];
 
-// ------ INIT SLIDE ------
-async function initSlide7() {
-    await loadSlide7Data();
-    populateYearDropdown();
-    drawTopEmittersPie();
-}
+/* ============= NEW NEW NEW — DISTINCT HSL HUE ROTATED SHADES ============= */
+function generateShades(baseColor, count) {
+  // Convert hex → HSL
+  function hexToHSL(hex) {
+    let r = parseInt(hex.slice(1, 3), 16) / 255;
+    let g = parseInt(hex.slice(3, 5), 16) / 255;
+    let b = parseInt(hex.slice(5, 7), 16) / 255;
 
-// ------ YEAR DROPDOWN ------
-function populateYearDropdown() {
-    const years = d3.range(2014, 2025);
-    const sel = document.getElementById("emitterYear");
-    sel.innerHTML = "";
+    let max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
 
-    years.forEach(y => {
-        const opt = document.createElement("option");
-        opt.value = y;
-        opt.textContent = y;
-        sel.appendChild(opt);
-    });
-
-    sel.value = 2024;
-
-    sel.onchange = () => {
-    drawTopEmittersPie();
-    const selected = document.querySelector("#sectorBreakdownContainer").style.display;
-
-    // If a sector chart is visible, refresh it
-    if (selected !== "none") {
-        const lastCountry = window.lastSelectedCountry;
-        const year = Number(sel.value);
-
-        if (lastCountry === "Rest of World") {
-            drawRestOfWorldSectors(year);
-        } else {
-            drawSectorBreakdown(lastCountry, year);
-        }
+    if (max === min) {
+      h = s = 0;
+    } else {
+      let d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+        case g: h = (b - r) / d + 2; break;
+        case b: h = (r - g) / d + 4; break;
+      }
+      h *= 60;
     }
-};
+    return { h, s: s * 100, l: l * 100 };
+  }
 
+  const hsl = hexToHSL(baseColor);
+  const H = hsl.h;
+
+  // **Extreme variation definitions**
+  const presets = [
+    { l: 10,  s: hsl.s },      // almost black
+    { l: 25,  s: hsl.s * 0.8 },// dark muted
+    { l: 40,  s: hsl.s * 1.2 },// darker + saturated
+    { l: 55,  s: hsl.s },      // mid-tone
+    { l: 70,  s: hsl.s * 1.4 },// bright saturated
+    { l: 85,  s: hsl.s * 0.8 },// pastel
+    { l: 95,  s: hsl.s * 0.4 },// very light pastel
+    { l: 50,  s: hsl.s * 0.2 },// greyish tone
+    { l: 50,  s: hsl.s * 1.8 },// hyper-saturated
+    { l: 98,  s: 20 }          // almost white but warm
+  ];
+
+  // Trim or extend to count
+  const selected = presets.slice(0, count);
+
+  // HSL → CSS rgb()
+  return selected.map(p => `hsl(${H}, ${Math.min(100, p.s)}%, ${Math.min(100, p.l)}%)`);
 }
 
-// ------ PIE CHART ------
-function drawTopEmittersPie() {
-    const year = Number(document.getElementById("emitterYear").value);
 
-    // Build country → emissions for selected year
-    const arr = slide7Totals.map(r => ({
-        country: r.Country,
-        value: Number(r[year]) || 0
-    }));
-    
-    const filteredArr = arr.filter(d => d.country !== "GLOBAL TOTAL");
+/* ==========================
+   DATA LOADING
+========================== */
+async function loadSlide6Data() {
+  if (slide6_totals.length > 0 && slide6_sectors.length > 0) return;
 
-    // Sort the **filtered** array
-    filteredArr.sort((a, b) => b.value - a.value);
+  const totalsCsv = await d3.csv("data/GHG_totals_by_country.csv");
+  const sectorsCsv = await d3.csv("data/GHG_by_sector_and_country.csv");
 
+  slide6_totals = totalsCsv.map(d => ({
+    code: d["EDGAR Country Code"],
+    country: d["Country"],
+    years: Object.fromEntries(
+      Object.keys(d).filter(k => k >= 1970 && k <= 2024)
+        .map(k => [k, +d[k]])
+    )
+  }));
 
-    const top10 = filteredArr.slice(0, 10);
-    const rest = filteredArr.slice(10).reduce((s, r) => s + r.value, 0);
+  slide6_sectors = sectorsCsv;
+}
 
-    const labels = [...top10.map(d => d.country), "Rest of World"];
-    const values = [...top10.map(d => d.value), rest];
-    const PIE_COLORS = [
-        "#4E79A7", "#F28E2B", "#E15759", "#76B7B2", "#59A14F",
-        "#EDC948", "#B07AA1", "#FF9DA7", "#9C755F", "#000000ff",
-        "#CCCCCC" // For "Rest of World"
-    ];
-    let countryColorMap = {};
-    // Pie chart size
-    const ctx = document.getElementById("topEmittersPie").getContext("2d");
-    if (topPieChart) topPieChart.destroy();
+/* ==========================
+   BAR RACE CHART
+========================== */
+function updateBarRace(year) {
+  document.getElementById("slide6YearLabel").textContent = year;
 
-    // Total emissions for percentage tooltip
-    const globalTotal = d3.sum(values);
-    labels.forEach((c, i) => {
-      countryColorMap[c] = PIE_COLORS[i];
+  let rows = slide6_totals
+    .map(d => ({
+      country: d.country,
+      value: d.years[year] || 0
+    }))
+    .filter(r => r.country !== "GLOBAL TOTAL")
+    .filter(r => r.country !== "EU27")
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 10);
+
+  rows.forEach(r => {
+    if (!countryColors[r.country]) {
+      const assignedCount = Object.keys(countryColors).length;
+      countryColors[r.country] = colorPalette[assignedCount % colorPalette.length];
+    }
   });
-    topPieChart = new Chart(ctx, {
-    type: "pie",
-    data: {
+
+  if (!barRaceChart) {
+    const ctx = document.getElementById("slide6BarRaceChart").getContext("2d");
+    barRaceChart = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: rows.map(r => r.country),
+        datasets: [{
+          label: "Emissions",
+          data: rows.map(r => r.value),
+          backgroundColor: rows.map(r => countryColors[r.country])
+        }]
+      },
+      options: {
+        indexAxis: "y",
+        plugins: {
+          tooltip: {
+            bodyFont: { size: 18 },
+            titleFont: { size: 20 },
+            callbacks: {
+              label: function(context) {
+                const value = context.raw;
+                const globalRow = slide6_totals.find(d => d.country === "GLOBAL TOTAL");
+                const globalTotal = globalRow ? globalRow.years[slide6_currentYear] : 0;
+
+                const pct = globalTotal > 0
+                  ? ((value / globalTotal) * 100).toFixed(2)
+                  : "0";
+
+                return `${value.toLocaleString()} (${pct}%)`;
+              }
+            }
+          }
+        },
+        onClick: (evt, elements) => {
+          if (elements.length === 0) return;
+          const idx = elements[0].index;
+          const country = barRaceChart.data.labels[idx];
+          updateSectorPie(country, slide6_currentYear);
+        }
+      }
+    });
+  } else {
+    barRaceChart.data.labels = rows.map(r => r.country);
+    barRaceChart.data.datasets[0].data = rows.map(r => r.value);
+    barRaceChart.data.datasets[0].backgroundColor =
+      rows.map(r => countryColors[r.country]);
+    barRaceChart.update();
+  }
+}
+
+/* ==========================
+   PIE CHART
+========================== */
+function updateSectorPie(country, year) {
+  let rows = slide6_sectors.filter(d => d.Country === country);
+
+  document.getElementById("slide6PieTitle").textContent =
+    `Sector Breakdown (${country}, ${year})`;
+
+  const labels = rows.map(r => r.Sector);
+  const values = rows.map(r => +r[year]);
+
+  const baseColor = countryColors[country];
+  const sectorColors = generateShades(baseColor, labels.length);
+
+  if (!sectorPieChart) {
+    const ctx = document.getElementById("slide6PieChart").getContext("2d");
+    sectorPieChart = new Chart(ctx, {
+      type: "pie",
+      data: {
         labels,
         datasets: [{
-            data: values,
-            backgroundColor: PIE_COLORS.slice(0, labels.length)
+          data: values,
+          backgroundColor: sectorColors
         }]
-    },
-    options: {
-        responsive: false,
+      },
+      options: {
         plugins: {
-            legend: { position: "bottom" },
-            tooltip: {
-                callbacks: {
-                    label: function (context) {
-                        const country = context.label;
-                        const val = context.raw;
-                        const pct = ((val / globalTotal) * 100).toFixed(2);
-                        return `${country}: ${val.toLocaleString()} MtCO₂e (${pct}%)`;
-                    }
-                }
+          tooltip: {
+            bodyFont: { size: 18 },
+            titleFont: { size: 20 },
+            callbacks: {
+              label: function(context) {
+                const value = context.raw;
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const pct = total > 0 ? ((value / total) * 100).toFixed(2) : "0";
+                return `${value.toLocaleString()} (${pct}%)`;
+              }
             }
-        },
-        onClick: (e, elements) => {
-            if (!elements.length) return;
-
-            const index = elements[0].index;
-            const country = labels[index];
-            const color = PIE_COLORS[index];  // <--- correct slice color
-
-            window.lastSelectedCountry = country;
-
-            if (country === "Rest of World") {
-                drawRestOfWorldSectors(year, color);
-                return;
-            }
-
-            drawSectorBreakdown(country, year, color);
+          },
+          legend: {
+            labels: { font: { size: 18 } }
+          }
         }
+      }
+    });
+  } else {
+    sectorPieChart.data.labels = labels;
+    sectorPieChart.data.datasets[0].data = values;
+    sectorPieChart.data.datasets[0].backgroundColor = sectorColors;
+    sectorPieChart.update();
+  }
+}
+
+
+/* ==========================
+   INITIALIZER
+========================== */
+async function initSlide6() {
+  await loadSlide6Data();
+
+  const slider = document.getElementById("slide6YearSlider");
+  const playBtn = document.getElementById("slide6PlayBtn");
+
+  slider.addEventListener("input", e => {
+    slide6_currentYear = +e.target.value;
+    updateBarRace(slide6_currentYear);
+  });
+
+  playBtn.addEventListener("click", () => {
+    if (slide6_playInterval) {
+      clearInterval(slide6_playInterval);
+      slide6_playInterval = null;
+      playBtn.textContent = "Play";
+      return;
     }
-});
-}
-// =====================================
-// SECTOR BAR CHART — INDIVIDUAL COUNTRY
-// =====================================
-function drawSectorBreakdown(country, year, barColor) {
 
-    const filtered = slide7Sectors.filter(
-        r => r.Country?.toLowerCase() === country.toLowerCase()
-    );
+    playBtn.textContent = "Pause";
 
-    const labels = [];
-    const values = [];
+    slide6_playInterval = setInterval(() => {
+      slide6_currentYear++;
+      if (slide6_currentYear > 2024) slide6_currentYear = 1970;
 
-    filtered.forEach(r => {
-        const v = Number(r[year]) || 0;
-        if (v > 0) {
-            labels.push(r.Sector);
-            values.push(v);
-        }
-    });
+      slider.value = slide6_currentYear;
+      updateBarRace(slide6_currentYear);
+    }, 700);
+  });
 
-    // World total for percentage tooltip
-    const worldTotal = slide7Totals.reduce(
-        (sum, r) => sum + (Number(r[year]) || 0), 0
-    );
-
-    showSectorChart(
-        `${country} — Sector Emissions (${year})`,
-        labels,
-        values,
-        barColor,
-        worldTotal
-    );
+  updateBarRace(slide6_currentYear);
 }
 
-
-// =====================================
-// REST OF WORLD — SECTOR COMPUTATION
-// =====================================
-function drawRestOfWorldSectors(year, barColor) {
-
-    // Determine top 10 emitters
-    const yearData = slide7Totals
-        .filter(r => r.Country !== "GLOBAL TOTAL")
-        .map(r => ({
-            country: r.Country,
-            value: Number(r[year]) || 0
-        }))
-        .sort((a, b) => b.value - a.value);
-
-    const top10 = yearData.slice(0, 10).map(d => d.country);
-
-    // Build sector totals
-    const sectorTotals = {};
-    const top10Totals = {};
-
-    slide7Sectors.forEach(r => {
-        const v = Number(r[year]) || 0;
-
-        if (!sectorTotals[r.Sector]) sectorTotals[r.Sector] = 0;
-        sectorTotals[r.Sector] += v;
-
-        if (top10.includes(r.Country)) {
-            if (!top10Totals[r.Sector]) top10Totals[r.Sector] = 0;
-            top10Totals[r.Sector] += v;
-        }
-    });
-
-    // Compute rest-of-world = total - top10
-    const labels = [];
-    const values = [];
-
-    Object.keys(sectorTotals).forEach(sec => {
-        const rest = sectorTotals[sec] - (top10Totals[sec] || 0);
-        if (rest > 0) {
-            labels.push(sec);
-            values.push(rest);
-        }
-    });
-
-    const worldTotal = yearData.reduce((s, r) => s + r.value, 0);
-
-    showSectorChart(
-        `Rest of World — Sector Emissions (${year})`,
-        labels,
-        values,
-        barColor,
-        worldTotal
-    );
-}
-
-
-// =====================================
-// SHARED BAR CHART RENDERER
-// =====================================
-function showSectorChart(title, labels, values, barColor, worldTotal) {
-
-    const ctx = document.getElementById("sectorBreakdownChart").getContext("2d");
-    if (sectorBarChart) sectorBarChart.destroy();
-
-    document.getElementById("sectorBreakdownContainer").style.display = "block";
-    document.getElementById("sectorBreakdownTitle").textContent = title;
-
-    sectorBarChart = new Chart(ctx, {
-        type: "bar",
-        data: {
-            labels,
-            datasets: [{
-                data: values,
-                backgroundColor: barColor   // ← EXACT SAME COLOR AS PIE SLICE
-            }]
-        },
-        options: {
-            indexAxis: "y",
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: (tt) => {
-                            const val = tt.raw;
-                            const pct = ((val / worldTotal) * 100).toFixed(2);
-                            return `${val.toLocaleString()} MtCO₂e (${pct}%)`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: { title: { display: true, text: "MtCO₂e" } },
-                y: { title: { display: true, text: "Sector" } }
-            }
-        }
-    });
-}
+window.initSlide6 = initSlide6;
 
 
 /* -------------------- Init -------------------- */
@@ -2879,7 +2866,8 @@ async function init() {
   initYearSlider();      // Slide 3: Initialize year slider and play button
   updateStateClickHandler(); // Slide 3: Update click handler for toggle
   initStateHoverStats(); // Initialize state hover stats
-  initSlide7();
+  await loadSlide6Data(); // Load data for Slide 6
+  initSlide6()
 }
 
 // init not being called fix solution 
