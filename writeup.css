@@ -125,3 +125,8 @@ main p {
     font-size: 1.6rem;
   }
 }
+
+#timelineSlide .timeline-hover-zone {
+  fill: transparent !important;
+  stroke: none !important;
+}
